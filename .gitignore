@@ -1,0 +1,25 @@
+# Covers JetBrains IDEs: IntelliJ, RubyMine, PhpStorm, AppCode, PyCharm
+*.iml
+.idea/
+
+# Eclipse
+.classpath
+.project
+.settings/
+
+# Maven
+target/
+
+# Scala worksheet
+*.sc
+
+# Various files
+*~
+*.log
+*.class
+.DS_Store
+._*
+*.versionsBackup
+*.zip
+
+.jobmate/
