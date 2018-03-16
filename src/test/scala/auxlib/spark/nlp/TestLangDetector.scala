@@ -9,10 +9,10 @@ class TestLangDetector extends FlatSpec with SparkTestHelper with Matchers with 
   import TestLangDetector._
 
 
-  "A LangDetector with default settings" should "detect correct the language of the given texts" in {
+  "A LangDetector (Optimaize) with default settings" should "detect correct the language of the given texts" in {
     val df = spark.sparkContext.parallelize(data).toDF("id", "text")
 
-    val langDetector = new LangDetector()
+    val langDetector = LangDetector.Optimaize()
 
     val resultDF = langDetector.transform(df)
 
@@ -27,10 +27,28 @@ class TestLangDetector extends FlatSpec with SparkTestHelper with Matchers with 
 
   }
 
-  "A LangDetector with custom settings" should "detect correct the language of the given texts" in {
+  "A LangDetector (OpenNLP) with default settings" should "detect correct the language of the given texts" in {
     val df = spark.sparkContext.parallelize(data).toDF("id", "text")
 
-    val langDetector = LangDetector.create{ builder =>
+    val langDetector = LangDetector.OpenNLP()
+
+    val resultDF = langDetector.transform(df)
+
+    val result: Array[String] = resultDF.select('id, 'language).as[(Int, String)]
+      .collect()
+      .sortBy{case (id, _) => id}
+      .map{ case (_, lang) => lang}
+
+    forAll(result.zip(groundTruth)){
+      case (r, g) => r shouldEqual g
+    }
+
+  }
+
+  "A LangDetector (Optimaize) with custom settings" should "detect correct the language of the given texts" in {
+    val df = spark.sparkContext.parallelize(data).toDF("id", "text")
+
+    val langDetector = LangDetector.Optimaize.create{ builder =>
       builder
         .minimalConfidence(0.8999d)
         .probabilityThreshold(0.3)
@@ -62,10 +80,10 @@ private[nlp] object TestLangDetector {
   )
 
   val groundTruth = Seq(
-    "EN",
-    "DE",
-    "EL",
-    "FR",
-    "IT"
+    "eng",
+    "deu",
+    "ell",
+    "fra",
+    "ita"
   )
 }
